@@ -1,0 +1,29 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment / secrets
+.env
+*.env
+
+# Generated / large binary data files
+# Download instructions: see data/README.md
+Hackathon_Files/
+prepared/
+
+# Local results store (contains real API job IDs and metadata)
+# See results/results.example.json for the schema
+results/results.json
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp

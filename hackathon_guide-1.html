@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OMTX Hub — GLP-1R Drug Design Hackathon</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0c0c0e;
+    color: #e8e8e8;
+    font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 56px 64px 72px;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 2px solid #E2E756;
+    padding-bottom: 28px;
+    margin-bottom: 36px;
+  }
+  .header-left h1 {
+    font-size: 34px;
+    font-weight: 700;
+    color: #E2E756;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+  .header-left h2 {
+    font-size: 17px;
+    font-weight: 400;
+    color: #aaa;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .header-right { text-align: right; }
+  .omtx-badge {
+    display: inline-block;
+    background: #E2E756;
+    color: #0c0c0e;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 2px;
+    padding: 5px 12px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .omtx-badge:hover { background: #f0ef6a; }
+  .header-date { color: #666; font-size: 13px; margin-top: 8px; }
+
+  /* ── Grid layouts ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: #141417;
+    border: 1px solid #222228;
+    border-radius: 12px;
+    padding: 22px 24px;
+  }
+  .card.accent     { border-color: #3a3a20; }
+  .card.track-a    { border-top: 3px solid #7ec8e3; }
+  .card.track-b    { border-top: 3px solid #E2E756; }
+  .card.files      { border-top: 3px solid #8b8bff; margin-bottom: 24px; }
+  .card.scoring    { border-top: 3px solid #5fc997; }
+  .card.tips       { margin-bottom: 0; }
+
+  /* ── Labels & headings ── */
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 14px;
+  }
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pill {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .pill-sm  { background: #7ec8e3; color: #0c0c0e; }
+  .pill-bio { background: #c084fc; color: #0c0c0e; }
+  .pill-mol { background: #E2E756; color: #0c0c0e; }
+
+  /* ── Steps ── */
+  .steps { list-style: none; }
+  .steps li {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #ccc;
+    align-items: flex-start;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    background: #1e1e24;
+    border: 1px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #E2E756;
+    margin-top: 1px;
+  }
+  .steps li strong { color: #fff; }
+
+  /* ── Promo codes ── */
+  .promo-code {
+    background: #141410;
+    border: 1px solid #3a3a20;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .promo-code code {
+    font-family: 'SF Mono', Menlo, 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: #E2E756;
+    letter-spacing: 1px;
+  }
+  .promo-desc { font-size: 12px; color: #888; white-space: nowrap; }
+
+  /* ── Target banner ── */
+  .target-banner {
+    background: linear-gradient(135deg, #0f1a0f 0%, #0d0d18 100%);
+    border: 1px solid #2a2a3a;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1.6fr;
+    gap: 32px;
+    align-items: start;
+  }
+  .target-item h4 {
+    font-size: 10px;
+    color: #555;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .target-item p { font-size: 14px; color: #ddd; }
+  .pdb-id {
+    font-size: 22px;
+    font-weight: 800;
+    color: #E2E756;
+    font-family: 'SF Mono', Menlo, monospace;
+    letter-spacing: 2px;
+  }
+  .residue-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .residue-tag {
+    background: #1e1e24;
+    border: 1px solid #2e2e3a;
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    color: #c9d1d9;
+  }
+
+  /* ── Code blocks ── */
+  .code-block {
+    background: #0a0a0c;
+    border: 1px solid #1e1e28;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'SF Mono', Menlo, 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.75;
+    color: #c9d1d9;
+    margin-top: 10px;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .kw  { color: #ff7b72; }
+  .str { color: #a5d6ff; }
+  .num { color: #79c0ff; }
+  .cmt { color: #546878; font-style: italic; }
+  .key { color: #E2E756; }
+
+  /* ── Info rows ── */
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid #1a1a1f;
+    font-size: 13.5px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .label { color: #888; }
+  .info-row .value { color: #fff; font-weight: 500; font-size: 12px; }
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .badge-up   { background: #1a3a1a; color: #5fc997; }
+  .badge-down { background: #1a3a1a; color: #5fc997; }
+
+  /* ── File items ── */
+  .files-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 32px;
+  }
+  .files-group-label {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+  }
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1a1f;
+    font-size: 13px;
+  }
+  .file-item:last-child { border-bottom: none; }
+  .file-name {
+    color: #a5d6ff;
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    flex: 1;
+  }
+  .file-desc { color: #555; font-size: 12px; white-space: nowrap; }
+  .file-fmt {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  .fmt-pdb { background: #1a2a3a; color: #7ec8e3; }
+  .fmt-cif { background: #2a1a3a; color: #c084fc; }
+
+  /* ── SMILES note ── */
+  .smiles-note {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #0f1a0f;
+    border-left: 3px solid #5fc997;
+    border-radius: 0 6px 6px 0;
+    font-size: 12.5px;
+    color: #aaa;
+  }
+  .smiles-note code {
+    color: #5fc997;
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 11.5px;
+    word-break: break-all;
+  }
+
+  /* ── Winners ── */
+  .winner-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1a1f;
+    font-size: 13px;
+  }
+  .winner-row:last-child { border-bottom: none; }
+  .winner-icon { font-size: 16px; width: 24px; text-align: center; }
+  .winner-name { color: #fff; font-weight: 600; flex: 1; }
+  .winner-desc { color: #555; font-size: 12px; }
+
+  /* ── Tips / warns ── */
+  .tip-item {
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1a1f;
+    font-size: 13.5px;
+    color: #bbb;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .tip-item:last-child { border-bottom: none; }
+  .tip-dot  { color: #E2E756; margin-top: 2px; flex-shrink: 0; }
+  .warn-dot { color: #ff7b72; margin-top: 2px; flex-shrink: 0; font-weight: 700; }
+
+  /* ── Tips grid ── */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0 28px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 32px;
+    border-top: 1px solid #1e1e24;
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    color: #555;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .footer a { color: #E2E756; text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ── Divider between sub-sections ── */
+  .sub-divider {
+    border: none;
+    border-top: 1px solid #1e1e24;
+    margin: 14px 0;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .page { padding: 32px 24px 48px; }
+    .two-col, .tips-grid, .files-grid { grid-template-columns: 1fr; }
+    .target-banner { grid-template-columns: 1fr; gap: 20px; }
+    .header { flex-direction: column; gap: 16px; }
+    .header-right { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+  <div class="header">
+    <div class="header-left">
+      <h1>GLP-1R Drug Design Hackathon</h1>
+      <h2>Participant Guide &nbsp;·&nbsp; Design the best binder to the GLP-1 Receptor</h2>
+    </div>
+    <div class="header-right">
+      <a class="omtx-badge" href="https://www.omtx.ai" target="_blank">OMTX Hub</a>
+      <div class="header-date">www.omtx.ai &nbsp;·&nbsp; 2026</div>
+    </div>
+  </div>
+
+  <!-- ── TWITCH BANNER ──────────────────────────────────────────────────── -->
+  <div style="background:#1a0a2e; border:1px solid #6441a5; border-radius:10px; padding:14px 22px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div style="width:36px; height:36px; background:#6441a5; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <svg width="18" height="20" viewBox="0 0 18 20" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M1 0L0 4v13.5h4.5V20h3l2.5-2.5H14l4-4V0H1zm15.5 12.5L14 15h-4l-2.5 2.5V15H3V1.5h13.5v11z"/><path d="M13.5 4.5h-1.5V9h1.5V4.5zM9.5 4.5H8V9h1.5V4.5z"/></svg>
+      </div>
+      <div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#9c6fd6; margin-bottom:3px;">Live Stream</div>
+        <div style="font-size:14px; color:#e8e8e8;">Watch the leaderboard live during the event</div>
+      </div>
+    </div>
+    <a href="https://www.twitch.tv/bduoto" target="_blank" style="display:flex; align-items:center; gap:8px; background:#6441a5; color:#fff; font-weight:700; font-size:14px; padding:9px 18px; border-radius:7px; text-decoration:none; white-space:nowrap; letter-spacing:0.3px;">
+      <svg width="14" height="15" viewBox="0 0 18 20" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M1 0L0 4v13.5h4.5V20h3l2.5-2.5H14l4-4V0H1zm15.5 12.5L14 15h-4l-2.5 2.5V15H3V1.5h13.5v11z"/><path d="M13.5 4.5h-1.5V9h1.5V4.5zM9.5 4.5H8V9h1.5V4.5z"/></svg>
+      twitch.tv/bduoto
+    </a>
+  </div>
+
+  <!-- ── TARGET BANNER ──────────────────────────────────────────────────── -->
+  <div class="target-banner">
+    <div class="target-item">
+      <h4>Challenge Target</h4>
+      <p>GLP-1 Receptor (GLP-1R)<br>Class B GPCR &nbsp;·&nbsp; T2D &amp; Obesity</p>
+    </div>
+    <div class="target-item">
+      <h4>Reference Structures</h4>
+      <p>
+        <span class="pdb-id">7KI0</span>&nbsp; GLP-1R + Semaglutide<br>
+        <span class="pdb-id">6XOX</span>&nbsp; GLP-1R + LY3502970
+      </p>
+    </div>
+    <div class="target-item">
+      <h4>Binding Pocket Residues (Orthosteric Site)</h4>
+      <div class="residue-grid">
+        <span class="residue-tag">Y152</span><span class="residue-tag">R190</span>
+        <span class="residue-tag">Y241</span><span class="residue-tag">R310</span>
+        <span class="residue-tag">W306</span><span class="residue-tag">L314</span>
+        <span class="residue-tag">E364</span><span class="residue-tag">H363</span>
+        <span class="residue-tag">L379</span><span class="residue-tag">R380</span>
+        <span class="residue-tag">F381</span><span class="residue-tag">L388</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GETTING STARTED + PROMO CODES ──────────────────────────────────── -->
+  <div class="two-col">
+    <div class="card">
+      <div class="section-label">Getting Started</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div>Visit <strong><a href="https://www.omtx.ai" target="_blank" style="color:#E2E756;">www.omtx.ai</a></strong> and create an account (or log in)</div></li>
+        <li><div class="step-num">2</div><div>From the dashboard, click <strong>Hub</strong> in the top navigation</div></li>
+        <li><div class="step-num">3</div><div>Open the <strong>User Menu</strong> (bottom-left) → <strong>Billing</strong> → add $50 to your wallet</div></li>
+        <li><div class="step-num">4</div><div>At checkout apply promo code — your $50 deposit is matched free (see right)</div></li>
+        <li><div class="step-num">5</div><div>Upgrade to <strong>Explore Plan</strong> with the second code for a free month of access</div></li>
+        <li><div class="step-num">6</div><div>Go to <strong>Hub → Models</strong>, pick a model, and start submitting jobs!</div></li>
+      </ul>
+      <hr class="sub-divider">
+      <div class="section-label">Running Jobs</div>
+      <div class="tip-item"><span class="tip-dot">▸</span><span><strong>UI:</strong> Hub → Models → fill the form → submit. View results in Hub → History. The 3D viewer shows structure + scores.</span></div>
+      <div class="tip-item"><span class="tip-dot">▸</span><span><strong>API:</strong> Get your key from User Menu → API Keys. Submit jobs programmatically. Full docs at Hub → Docs.</span></div>
+    </div>
+    <div class="card accent">
+      <div class="section-label">Promo Codes</div>
+      <div class="promo-code">
+        <code>OMHACKATHONWALLET100</code>
+        <span class="promo-desc">$50 free wallet credit</span>
+      </div>
+      <div class="promo-code">
+        <code>OMHACKATHON100</code>
+        <span class="promo-desc">Free month · Explore plan</span>
+      </div>
+      <p style="font-size:12.5px; color:#666; margin-top:10px; line-height:1.5;">
+        Enter <strong style="color:#E2E756;">OMHACKATHONWALLET100</strong> at billing checkout to receive $50 free on your $50 deposit.
+        Use <strong style="color:#E2E756;">OMHACKATHON100</strong> when upgrading your plan for a complimentary month of Explore.
+      </p>
+      <hr class="sub-divider">
+      <div class="section-label">Objective</div>
+      <p style="font-size:13.5px; color:#ccc; line-height:1.6;">
+        Design the best-scoring binder to GLP-1R — a class B GPCR and validated drug target
+        for type 2 diabetes and obesity. Use the provided structure files and any model on Hub.
+        The live leaderboard is at <strong style="color:#5fc997;">Hub → Leaderboard</strong>
+        and updates every 30 seconds.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── PROVIDED FILES ─────────────────────────────────────────────────── -->
+  <div class="card files">
+    <div class="section-label">Provided Structure Files &nbsp;·&nbsp; Chain R = GLP-1R in both structures</div>
+    <div class="files-grid">
+      <div>
+        <div class="files-group-label" style="color:#7ec8e3;">7KI0 — GLP-1R + Semaglutide (peptide agonist &nbsp;·&nbsp; 491 res &nbsp;·&nbsp; chain R)</div>
+        <div class="file-item"><span class="fmt-pdb file-fmt">PDB</span><span class="file-name">7KI0_GLP1R_chainR.pdb</span><span class="file-desc">Receptor only · 3,175 atoms</span></div>
+        <div class="file-item"><span class="fmt-cif file-fmt">CIF</span><span class="file-name">7KI0_GLP1R_chainR.cif</span><span class="file-desc">Receptor only · 3,175 atoms</span></div>
+        <div class="file-item"><span class="fmt-pdb file-fmt">PDB</span><span class="file-name">7KI0_all_polymers.pdb</span><span class="file-desc">Full complex, no water/ligands · 9,143 atoms</span></div>
+        <div class="file-item"><span class="fmt-cif file-fmt">CIF</span><span class="file-name">7KI0_all_polymers.cif</span><span class="file-desc">Full complex, no water/ligands · 9,143 atoms</span></div>
+      </div>
+      <div>
+        <div class="files-group-label" style="color:#c084fc;">6XOX — GLP-1R + LY3502970 (small molecule agonist &nbsp;·&nbsp; 445 res &nbsp;·&nbsp; chain R)</div>
+        <div class="file-item"><span class="fmt-pdb file-fmt">PDB</span><span class="file-name">6XOX_GLP1R_chainR.pdb</span><span class="file-desc">Receptor only · 2,989 atoms</span></div>
+        <div class="file-item"><span class="fmt-cif file-fmt">CIF</span><span class="file-name">6XOX_GLP1R_chainR.cif</span><span class="file-desc">Receptor only · 2,989 atoms</span></div>
+        <div class="file-item"><span class="fmt-pdb file-fmt">PDB</span><span class="file-name">6XOX_all_polymers.pdb</span><span class="file-desc">Full complex, no water/ligands · 10,564 atoms</span></div>
+        <div class="file-item"><span class="fmt-cif file-fmt">CIF</span><span class="file-name">6XOX_all_polymers.cif</span><span class="file-desc">Full complex, no water/ligands · 10,564 atoms</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TRACKS ─────────────────────────────────────────────────────────── -->
+  <div class="two-col">
+
+    <!-- Track A -->
+    <div class="card track-a">
+      <div class="section-label">Track A</div>
+      <h3><span class="pill pill-sm">Biologics</span> Peptide / Protein Binders</h3>
+      <p style="font-size:13px; color:#999; margin-bottom:12px;">
+        Design a peptide or protein that binds to GLP-1R. Use the semaglutide sequence as a starting point and mutate, extend, or redesign it.
+      </p>
+      <div style="font-size:12px; color:#777; font-weight:600; margin-bottom:6px;">Recommended Models</div>
+      <div class="info-row"><span class="label">BindCraft</span><span class="value">De novo protein binder design</span></div>
+      <div class="info-row"><span class="label">BoltzGen</span><span class="value">Generative binder &amp; protein design</span></div>
+      <div style="margin-top:14px; font-size:12px; color:#777; font-weight:600; margin-bottom:2px;">Boltz-2 YAML — Peptide Binder</div>
+      <div class="code-block"><span class="key">version</span>: <span class="num">1</span>
+<span class="key">sequences</span>:
+  - <span class="key">protein</span>:
+      <span class="key">id</span>: <span class="str">A</span>
+      <span class="key">sequence</span>: <span class="cmt"># paste full GLP-1R sequence from chainR files</span>
+        <span class="str">MKTIIALSYIFCLVFA...HHHHHHHH</span>
+  - <span class="key">protein</span>:
+      <span class="key">id</span>: <span class="str">B</span>
+      <span class="key">sequence</span>: <span class="str">HAEGTFTSDVSSYLEGQAAKEFIAWLVRGRG</span>
+        <span class="cmt">          # ↑ modify this peptide sequence</span>
+<span class="key">constraints</span>:
+  - <span class="key">pocket</span>:
+      <span class="key">binder</span>: <span class="str">B</span>
+      <span class="key">contacts</span>:
+        - [A, <span class="num">152</span>]   <span class="cmt"># Y152</span>
+        - [A, <span class="num">306</span>]   <span class="cmt"># W306</span>
+        - [A, <span class="num">364</span>]   <span class="cmt"># E364</span>
+        - [A, <span class="num">380</span>]   <span class="cmt"># R380</span></div>
+      <div class="smiles-note">
+        Starting peptide (semaglutide analog from 7KI0):<br>
+        <code>HAEGTFTSDVSSYLEGQAAKEFIAWLVRGRG</code>
+      </div>
+      <div style="margin-top:12px; font-size:12.5px; color:#888; padding:10px 12px; background:#1a1a24; border-radius:6px;">
+        <strong style="color:#7ec8e3;">Winner criteria:</strong> Highest BindCraft or BoltzGen confidence score.
+        Bonus: predicted pAE &lt; 5, pLDDT &gt; 80 at interface residues.
+      </div>
+    </div>
+
+    <!-- Track B -->
+    <div class="card track-b">
+      <div class="section-label">Track B</div>
+      <h3><span class="pill pill-mol">Small Molecule</span> Ligand Binders</h3>
+      <p style="font-size:13px; color:#999; margin-bottom:12px;">
+        Design or dock a small molecule to the GLP-1R orthosteric pocket. Use LY3502970 (from 6XOX) as a scaffold or design something new.
+      </p>
+      <div style="font-size:12px; color:#777; font-weight:600; margin-bottom:6px;">Recommended Models</div>
+      <div class="info-row"><span class="label">Boltz-2</span><span class="value">Protein–ligand structure prediction</span></div>
+      <div class="info-row"><span class="label">DiffDock</span><span class="value">Diffusion-based docking confidence</span></div>
+      <div class="info-row"><span class="label">FlowDock</span><span class="value">Flow-based docking confidence</span></div>
+      <div class="info-row"><span class="label">NeuralPlexer</span><span class="value">Co-structure confidence</span></div>
+      <div style="margin-top:14px; font-size:12px; color:#777; font-weight:600; margin-bottom:2px;">Boltz-2 YAML — Protein–Ligand</div>
+      <div class="code-block"><span class="key">version</span>: <span class="num">1</span>
+<span class="key">sequences</span>:
+  - <span class="key">protein</span>:
+      <span class="key">id</span>: <span class="str">A</span>
+      <span class="key">sequence</span>: <span class="cmt"># paste full GLP-1R sequence from chainR files</span>
+        <span class="str">MKTIIALSYIFCLVFA...HHHHHHHH</span>
+  - <span class="key">ligand</span>:
+      <span class="key">id</span>: <span class="str">B</span>
+      <span class="key">smiles</span>: <span class="str">"[your molecule SMILES here]"</span>
+<span class="key">constraints</span>:
+  - <span class="key">pocket</span>:
+      <span class="key">binder</span>: <span class="str">B</span>
+      <span class="key">contacts</span>:
+        - [A, <span class="num">152</span>]   <span class="cmt"># Y152</span>
+        - [A, <span class="num">306</span>]   <span class="cmt"># W306</span>
+        - [A, <span class="num">364</span>]   <span class="cmt"># E364</span>
+        - [A, <span class="num">380</span>]   <span class="cmt"># R380</span></div>
+      <div class="smiles-note">
+        LY3502970 baseline SMILES (from 6XOX):<br>
+        <code>Cc1cc(NC(=O)c2cnc(N3CCC[C@@H]3C(N)=O)nc2)ccc1F</code>
+      </div>
+      <div style="margin-top:12px; font-size:12.5px; color:#888; padding:10px 12px; background:#1e1a0e; border-radius:6px;">
+        <strong style="color:#E2E756;">Winner criteria:</strong> DiffDock/FlowDock/NeuralPlexer → higher confidence. Boltz-2 → lower ΔG (kcal/mol).
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCORING ───────────────────────────────────────────────────────── -->
+  <div class="card scoring" style="margin-bottom:24px;">
+    <div class="section-label">Scoring &amp; Leaderboard</div>
+    <p style="font-size:13px; color:#999; margin-bottom:16px;">
+      Live at <strong style="color:#5fc997;">Hub → Leaderboard</strong> · updates every 30 s ·
+      only your <em>best</em> run per model counts · unlimited submissions
+    </p>
+    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:10px;">
+      <div style="background:#0f0f12; border-radius:8px; padding:12px 14px;">
+        <div style="font-size:12px; color:#888; margin-bottom:6px;">DiffDock</div>
+        <span class="badge badge-up">↑ higher</span>
+      </div>
+      <div style="background:#0f0f12; border-radius:8px; padding:12px 14px;">
+        <div style="font-size:12px; color:#888; margin-bottom:6px;">FlowDock</div>
+        <span class="badge badge-up">↑ higher</span>
+      </div>
+      <div style="background:#0f0f12; border-radius:8px; padding:12px 14px;">
+        <div style="font-size:12px; color:#888; margin-bottom:6px;">NeuralPlexer</div>
+        <span class="badge badge-up">↑ higher</span>
+      </div>
+      <div style="background:#0f0f12; border-radius:8px; padding:12px 14px;">
+        <div style="font-size:12px; color:#888; margin-bottom:6px;">Boltz-2</div>
+        <span class="badge badge-down">↓ lower ΔG</span>
+      </div>
+      <div style="background:#0f0f12; border-radius:8px; padding:12px 14px;">
+        <div style="font-size:12px; color:#888; margin-bottom:6px;">BindCraft</div>
+        <span class="badge badge-up">↑ higher</span>
+      </div>
+      <div style="background:#0f0f12; border-radius:8px; padding:12px 14px;">
+        <div style="font-size:12px; color:#888; margin-bottom:6px;">BoltzGen</div>
+        <span class="badge badge-up">↑ higher</span>
+      </div>
+    </div>
+    <div style="margin-top:12px; padding:10px 12px; background:#0f0f12; border-radius:6px; font-size:12.5px; color:#666; line-height:1.6;">
+      Scores are <strong style="color:#888;">not cross-model comparable</strong> — each model has its own leaderboard tab.
+      Your rank per model is based on your single best submission.
+    </div>
+  </div>
+
+  <!-- ── TIPS ───────────────────────────────────────────────────────────── -->
+  <div class="card tips">
+    <div class="section-label">Tips for Success</div>
+    <div class="tips-grid">
+      <div class="tip-item"><span class="tip-dot">→</span><span><strong>Track A:</strong> Start with the semaglutide sequence above and mutate or extend it. Try both BindCraft and BoltzGen for diverse designs.</span></div>
+      <div class="tip-item"><span class="tip-dot">→</span><span><strong>Track B:</strong> LY3502970 SMILES (from 6XOX) is a strong small molecule baseline. Try scaffold hopping or fragment-based modifications.</span></div>
+      <div class="tip-item"><span class="tip-dot">→</span><span>Run multiple models on the same molecule for orthogonal confidence. Use Hub → History to review 3D poses and check binding orientation.</span></div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────────────────── -->
+  <div class="footer">
+    <span>Questions? <a href="mailto:bryan@omtx.ai">bryan@omtx.ai</a></span>
+    <span>Live stream: <a href="https://www.twitch.tv/bduoto" target="_blank" style="color:#9c6fd6;">twitch.tv/bduoto</a></span>
+    <span>Docs: <strong style="color:#E2E756;">Hub → Docs</strong></span>
+    <span><a href="https://www.omtx.ai" target="_blank">www.omtx.ai</a> &nbsp;·&nbsp; Hub &nbsp;·&nbsp; Hackathon 2026</span>
+  </div>
+
+</div>
+</body>
+</html>

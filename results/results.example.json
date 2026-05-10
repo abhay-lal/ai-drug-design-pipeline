@@ -1,0 +1,42 @@
+[
+  {
+    "job_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "variant_name": "E22D",
+    "model": "alphafold",
+    "status": "completed",
+    "score": 0.83,
+    "score_label": "iptm",
+    "error": null,
+    "recorded_at": "2026-05-08T07:05:53.295565"
+  },
+  {
+    "job_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "variant_name": "T7A",
+    "model": "alphafold",
+    "status": "completed",
+    "score": 0.84,
+    "score_label": "iptm",
+    "error": null,
+    "recorded_at": "2026-05-08T07:05:53.295565"
+  },
+  {
+    "job_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "variant_name": "short_25_35_v2",
+    "model": "boltzgen",
+    "status": "completed",
+    "score": 0.7937,
+    "score_label": "iptm",
+    "error": null,
+    "recorded_at": "2026-05-08T07:20:09.591221"
+  },
+  {
+    "job_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "variant_name": "core4",
+    "model": "bindcraft",
+    "status": "failed",
+    "score": null,
+    "score_label": null,
+    "error": "Spot VM preemption — retry job",
+    "recorded_at": "2026-05-08T08:35:02.253034"
+  }
+]
