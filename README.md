@@ -1,52 +1,47 @@
 # GLP-1R Binder Design — OMTX Hub Hackathon 2026
 
-> **Track A · Biologics** — Automated peptide/protein binder design pipeline against GLP-1R, a validated drug target for type 2 diabetes and obesity.
-
-Built for the [OMTX Hub](https://omtx.ai) GLP-1R Drug Design Hackathon. The pipeline generates semaglutide-derived peptide variants, submits them to cloud ML models, and tracks results against the live leaderboard.
+> **Track A · Biologics** — Automated peptide/protein binder design pipeline against GLP-1R, a validated drug target for type 2 diabetes and obesity (semaglutide, Ozempic).
 
 ---
 
-## Results
+## Goal
 
-### Leaderboard (Hub → BoltzGen tab)
+**GLP-1R (Glucagon-Like Peptide-1 Receptor)** is a class B GPCR and the primary target of blockbuster drugs semaglutide (Ozempic/Wegovy) and tirzepatide. Designing better binders — peptides or proteins that bind more tightly and selectively — could unlock next-generation treatments for type 2 diabetes and obesity.
 
-| Rank | Variant | Model | iPTM | Notes |
-|------|---------|-------|------|-------|
-| 🥇 | `short_25_35_v2` | BoltzGen | **0.794** | Short peptide (25–35 aa), second sample |
-| 🥈 | `short_20_30_v2` | BoltzGen | 0.731 | GLP-1 analog length range |
-| 🥉 | `long_65_85` | BoltzGen | 0.549 | Miniprotein range |
-| 4 | `long_75_90` | BoltzGen | 0.543 | Full miniprotein |
-| 5 | `long_55_75` | BoltzGen | 0.431 | Long binder |
-
-### AlphaFold2 Screening (peptide variant ranking, not on leaderboard)
-
-| Variant | iPTM | Mutation | Insight |
-|---------|------|----------|---------|
-| T7A | **0.84** | Thr→Ala at pos 7 | Top hit — removes polar group at N-terminus |
-| R29K | **0.84** | Arg→Lys at pos 29 | Conservative charge-preserving swap |
-| E22D | 0.83 | Glu→Asp at pos 22 | Shorter side chain improves fit |
-| Y13L | 0.82 | Tyr→Leu at pos 13 | Hydrophobic swap at helix core |
-| A18C | 0.81 | Ala→Cys at pos 18 | Potential disulfide anchor site |
-
-> iPTM (interface predicted TM-score) measures predicted binding quality. Values above 0.6 are strong; 0.8+ is excellent.
+The challenge: explore a large peptide design space computationally, rank candidates by predicted binding quality, and generate novel binders using generative ML models — all without wet-lab synthesis.
 
 ---
 
-## How It Works
+## Approach
+
+The pipeline runs in three stages:
+
+**1. Generate a diverse variant library** from the semaglutide analog co-crystallised in [PDB 7KI0](https://www.rcsb.org/structure/7KI0). Starting from the 31-residue baseline `HAEGTFTSDVSSYLEGQAAKEFIAWLVRGRG`, we apply:
+- Conservative single-point mutations at all 31 positions (literature-guided amino acid substitutions)
+- Literature-guided hotspot mutations at the 12 orthosteric pocket contacts (Y152, R190, Y241, W306, R310, L314, H363, E364, L379, R380, F381, L388)
+- Double-mutation combinations of top hotspot residues
+- N-terminal truncations (find minimal binding fragment)
+- C-terminal helicity extensions
+
+This generates **117 unique peptide variants** covering the local sequence neighbourhood of a known active peptide.
+
+**2. Screen with AlphaFold2 multimer** to rank variants by predicted binding quality (iPTM score) before committing to expensive generative design runs. The top-scoring mutations (T7A iPTM=0.84, E22D iPTM=0.83) identify which positions in the peptide contribute most to receptor binding.
+
+**3. Run generative design models** (BoltzGen, BindCraft) that design novel binders from scratch given the receptor structure — not just scoring existing sequences, but generating entirely new ones. These post scores directly to the competition leaderboard.
 
 ```
 Semaglutide baseline (31 aa)
         │
         ▼
  variants.py ──► 117 peptide variants
-   (single-point mutations, hotspot combos,
+   (single-point, hotspot combos,
     N-term truncations, C-term extensions)
         │
         ▼
   run.py CLI
-   ├─ submit-batch  ──► AlphaFold2 multimer  ($3/run) ── iPTM score
-   ├─ boltzgen-batch ──► BoltzGen            ($5/run) ── iPTM → Leaderboard ✓
-   └─ bindcraft-batch ─► BindCraft           ($10/run) ─ confidence → Leaderboard ✓
+   ├─ submit-batch   ──► AlphaFold2 multimer ── iPTM score (screening)
+   ├─ boltzgen-batch ──► BoltzGen            ── iPTM → Leaderboard ✓
+   └─ bindcraft-batch ─► BindCraft           ── confidence → Leaderboard ✓
         │
         ▼
  results_tracker.py ──► results/results.json
@@ -55,11 +50,46 @@ Semaglutide baseline (31 aa)
   run.py leaderboard  (local ranked table)
 ```
 
-**Two tracks on the Hub leaderboard:**
-- **BoltzGen** — generative binder design from receptor CIF, varied length ranges
-- **BindCraft** — de novo binder design from receptor PDB + hotspot residues
+---
 
-AlphaFold2 is used as a cheap screening tool to rank semaglutide variants before committing budget to the leaderboard models.
+## Results
+
+### Hub Leaderboard (BoltzGen tab)
+
+| Rank | Variant | iPTM | Binder Length |
+|------|---------|------|---------------|
+| 🥇 | `short_25_35_v2` | **0.794** | 25–35 aa |
+| 🥈 | `short_20_30_v2` | 0.731 | 20–30 aa (GLP-1 analog length) |
+| 🥉 | `long_65_85` | 0.549 | 65–85 aa |
+| 4 | `long_75_90` | 0.543 | 75–90 aa (miniprotein) |
+| 5 | `long_55_75` | 0.431 | 55–75 aa |
+
+The short-range binders (25–35 aa) outperform longer miniproteins, consistent with the GLP-1 peptide hormone family being naturally ~30 residues.
+
+### AlphaFold2 Screening — Top Semaglutide Variants
+
+| Variant | iPTM | Mutation | Structural Insight |
+|---------|------|----------|--------------------|
+| T7A | **0.84** | Thr→Ala at pos 7 | Removing the polar hydroxyl at N-terminus improves helical packing |
+| R29K | **0.84** | Arg→Lys at pos 29 | Conservative charge-preserving swap at C-terminal anchor |
+| E22D | 0.83 | Glu→Asp at pos 22 | Shorter carboxylate side chain reduces steric clash in pocket |
+| Y13L | 0.82 | Tyr→Leu at pos 13 | Hydrophobic swap reinforces helix core |
+| A18C | 0.81 | Ala→Cys at pos 18 | Potential disulfide stabilisation site |
+
+> **iPTM** (interface predicted TM-score) is AlphaFold2's metric for predicted binding quality at the protein–protein interface. Values above 0.6 are strong; 0.8+ is excellent and comparable to known drug–target interactions.
+
+---
+
+## Models Used
+
+| Model | Role in Pipeline | Reference |
+|-------|-----------------|-----------|
+| **AlphaFold2 Multimer** | Screen 117 peptide variants — predicts receptor–peptide complex structure and returns iPTM/pTM/pLDDT | Jumper et al. (2021) *Nature* · Evans et al. (2022) [bioRxiv](https://www.biorxiv.org/content/10.1101/2021.10.04.463034) |
+| **BoltzGen** | Generative binder design from receptor CIF — samples novel peptide sequences and structures conditioned on the target pocket | Wohlwend et al. (2024) [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.11.19.624167) |
+| **BindCraft** | De novo protein binder design using hallucination + partial diffusion from hotspot residues | Pacesa et al. (2024) [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.09.30.615802) |
+| **Chai-1** | Cheap multimer structure prediction (used as AlphaFold2 alternative for rapid screening) | Chai Discovery (2024) [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.10.10.615955) |
+
+All models accessed via the [OMTX Hub](https://omtx.ai) cloud compute platform.
 
 ---
 
@@ -83,7 +113,7 @@ curl -o Hackathon_Files/Protein_Binder_Hackathon_Files/7KI0_GLP1R_chainR.pdb \
   "https://files.rcsb.org/download/7KI0.pdb"
 ```
 
-Set your OMTX API key (get it from Hub → User Menu → API Keys):
+Set your OMTX API key (Hub → User Menu → API Keys):
 ```bash
 export OMTX_API_KEY=your_key_here
 ```
@@ -93,28 +123,25 @@ export OMTX_API_KEY=your_key_here
 ## Usage
 
 ```bash
-# Check wallet balance
-python pipeline/run.py credits
-
 # Preview all 117 generated variants
 python pipeline/run.py variants
 
 # ── LEADERBOARD COMMANDS ────────────────────────────────────────
-# BoltzGen: generative binder design ($5/run) → Hub leaderboard
+# BoltzGen: generative binder design → Hub leaderboard
 python pipeline/run.py boltzgen-batch --limit 5
 
-# BindCraft: de novo binder from hotspot residues ($10/run) → Hub leaderboard
+# BindCraft: de novo binder from hotspot residues → Hub leaderboard
 python pipeline/run.py bindcraft-batch --limit 3
 
-# Dry run to preview without spending
+# Dry run to preview without submitting
 python pipeline/run.py boltzgen-batch --dry-run
 python pipeline/run.py bindcraft-batch --dry-run
 
 # ── SCREENING COMMANDS ──────────────────────────────────────────
-# AlphaFold2 multimer: cheap variant ranking ($3/run, not on leaderboard)
+# AlphaFold2 multimer: rank peptide variants by predicted iPTM
 python pipeline/run.py submit-batch --strategy hotspot --model alphafold --limit 7
 
-# Chai-1: even cheaper screening ($0.85/run)
+# Chai-1: cheaper multimer screening
 python pipeline/run.py submit-batch --strategy hotspot --model chai1 --limit 7
 
 # ── RESULTS ────────────────────────────────────────────────────
@@ -158,18 +185,6 @@ python pipeline/run.py plan          # budget breakdown + recommendations
 
 - **Receptor:** GLP-1R (PDB [7KI0](https://www.rcsb.org/structure/7KI0)) — Class B GPCR, 384 resolved residues
 - **Baseline peptide:** `HAEGTFTSDVSSYLEGQAAKEFIAWLVRGRG` (31 aa semaglutide analog from 7KI0)
-- **Key binding pocket residues:** Y152, R190, Y241, W306, R310, L314, H363, E364, L379, R380, F381, L388
-- **BoltzGen chain:** `F` in `7ki0.cif` (entity 6, label_asym_id F — full RCSB mmCIF required)
-- **BindCraft chain:** `R` in `7KI0_GLP1R_chainR.pdb` (pre-extracted receptor)
-
----
-
-## Model Pricing (OMTX Hub, 2026)
-
-| Model | Cost | Leaderboard | Use case |
-|-------|------|-------------|----------|
-| BoltzGen | $5.00/run | ✅ Track A | Generative binder design |
-| BindCraft | $10.00/run | ✅ Track A | De novo binder from hotspots |
-| AlphaFold2 | $3.00/run | ❌ screening | Multimer iPTM scoring |
-| Chai-1 | $0.85/run | ❌ screening | Cheap multimer screening |
-| Boltz-2 | $0.85/run | ✅ Track B | Protein-ligand ΔG |
+- **Orthosteric pocket residues:** Y152, R190, Y241, W306, R310, L314, H363, E364, L379, R380, F381, L388
+- **BoltzGen input:** full RCSB mmCIF `7ki0.cif`, chain F (entity 6 — GLP-1R)
+- **BindCraft input:** `7KI0_GLP1R_chainR.pdb`, chain R
