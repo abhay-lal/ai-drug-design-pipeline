@@ -1,6 +1,23 @@
 # GLP-1R Binder Design — OMTX Hub Hackathon 2026
 
-> **Track A · Biologics** — Automated peptide/protein binder design pipeline against GLP-1R, a validated drug target for type 2 diabetes and obesity (semaglutide, Ozempic).
+> **🏆 1st Place — Track A (Biologics)** · BoltzGen category (0.9540 iPTM) and AlphaFold2 category (0.8400 iPTM) · [OMTX Hub GLP-1R Drug Design Challenge](https://omtx.ai)
+
+Automated peptide/protein binder design pipeline against GLP-1R, a validated drug target for type 2 diabetes and obesity (semaglutide, Ozempic). Built end-to-end in ~24 hours for the OMTX Hub Hackathon — 11 teams, 164 total submissions, 5 models scored.
+
+---
+
+## Results — Final Leaderboard
+
+**Track A — Biologics (1st place in both scored models)**
+
+| 🏆 | Model | Score | Submissions |
+|----|-------|-------|-------------|
+| 🥇 1st | BoltzGen | **0.9540 iPTM** | 10 |
+| 🥇 1st | AlphaFold2 | **0.8400 iPTM** | 8 |
+
+> Competition stats: 11 teams · 164 completed scoring jobs · 5 models with results (3 small molecule, 2 biologic)
+
+![Final Results](assets/final-results.png)
 
 ---
 
@@ -52,21 +69,23 @@ Semaglutide baseline (31 aa)
 
 ---
 
-## Results
+## Submission Results
 
-### Hub Leaderboard (BoltzGen tab)
+### Hub Leaderboard — BoltzGen (1st place, 0.9540 iPTM)
 
-| Rank | Variant | iPTM | Binder Length |
-|------|---------|------|---------------|
-| 🥇 | `short_25_35_v2` | **0.794** | 25–35 aa |
-| 🥈 | `short_20_30_v2` | 0.731 | 20–30 aa (GLP-1 analog length) |
-| 🥉 | `long_65_85` | 0.549 | 65–85 aa |
-| 4 | `long_75_90` | 0.543 | 75–90 aa (miniprotein) |
-| 5 | `long_55_75` | 0.431 | 55–75 aa |
+| Variant | iPTM | Binder Length |
+|---------|------|---------------|
+| `short_25_35_v2` | **0.794** | 25–35 aa |
+| `short_20_30_v2` | 0.731 | 20–30 aa (GLP-1 analog length) |
+| `long_65_85` | 0.549 | 65–85 aa |
+| `long_75_90` | 0.543 | 75–90 aa (miniprotein) |
+| `long_55_75` | 0.431 | 55–75 aa |
+
+> The Hub leaderboard scores the best run per team — the 0.9540 final score reflects the top BoltzGen design across all 10 submissions.
 
 The short-range binders (25–35 aa) outperform longer miniproteins, consistent with the GLP-1 peptide hormone family being naturally ~30 residues.
 
-### AlphaFold2 Screening — Top Semaglutide Variants
+### AlphaFold2 Screening — Top Semaglutide Variants (1st place, 0.8400 iPTM)
 
 | Variant | iPTM | Mutation | Structural Insight |
 |---------|------|----------|--------------------|
